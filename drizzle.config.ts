@@ -9,6 +9,6 @@ export default defineConfig({
   out: './src/drizzle',
   casing: 'snake_case',
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    url: process.env.DATABASE_URL,
   },
 })

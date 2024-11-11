@@ -4,6 +4,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "baseUrl": "./src",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "paths": {
       "@/*": ["./*"]
@@ -17,6 +18,7 @@
   "include": [
     "src/**/*.ts",
     "vitest.config.ts",
-    "drizzle.config.ts"
+    "drizzle.config.ts",
+    "global.d.ts"
   ]
 }
