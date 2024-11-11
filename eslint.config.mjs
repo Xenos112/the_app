@@ -8,5 +8,7 @@ export default antfu({
     'node/prefer-global/process': 'off',
     'ts/no-unsafe-call': 'off',
     'ts/no-unsafe-member-access': 'off',
+    'no-console': 'warn',
+    'ts/no-unsafe-argument': 'off',
   },
 })

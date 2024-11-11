@@ -4,13 +4,14 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "test": "vitest",
-    "lint": "eslint --fix --cache --no-ignore .",
+    "lint": "eslint --fix --no-ignore .",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.5",
+    "arctic": "^2.2.2",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.1",
