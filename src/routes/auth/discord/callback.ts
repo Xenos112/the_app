@@ -36,5 +36,5 @@ export default new Hono().get('/', async (c) => {
   const _discordUser = await discordUserResponse.json() as DiscordUser
 
   // todo: save the user in the database
-  return c.redirect('/')
+  return c.redirect('/', 302)
 })
