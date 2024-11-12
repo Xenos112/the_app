@@ -5,7 +5,7 @@ import auth from './routes/auth'
 
 config()
 
-const app = new Hono().route('/auth', auth)
+export const app = new Hono().route('/auth', auth)
 
 const port = 3000
 serve({
