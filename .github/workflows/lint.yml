@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - develop  
   pull_request:
     branches:
       - master
@@ -14,18 +15,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+    - name: Check out code
+      uses: actions/checkout@v4  
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3 
+      with:
+        node-version: '18.x'  
 
-      - name: Install dependencies
-        run: |
-          pnpm install
+    - name: Install pnpm
+      run: |
+        npm install -g pnpm 
 
-      - name: Run lint
-        run: |
-          pnpm lint
+    - name: Install dependencies
+      run: |
+        pnpm install 
+
+    - name: Run lint
+      run: |
+        pnpm lint  # Run the linting command
