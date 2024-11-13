@@ -1,11 +1,28 @@
 import { relations, sql } from 'drizzle-orm'
 import {
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core'
+
+export const CommunityRole = pgEnum('community_roles', ['Creator', 'Admin', 'User'])
+export const MediaTargetTypes = pgEnum('media_target_types', ['image', 'video'])
+export const PostTargetTypes = pgEnum('post_target_types', ['community', 'profile'])
+
+export const Media = pgTable('source_urls', {
+  id: text('id')
+    .primaryKey()
+    .notNull()
+    .default(sql`gen_random_uuid()`),
+  url: text('url').notNull(),
+  target_type: MediaTargetTypes('target_type').default('image'),
+  target_id: text('post_id')
+    .notNull(),
+  created_at: timestamp('created_at').defaultNow(),
+})
 
 export const User = pgTable('users', {
   id: text('id')
@@ -14,10 +31,13 @@ export const User = pgTable('users', {
     .default(sql`gen_random_uuid()`),
   user_name: text('user_name').notNull(),
   email: text('email').notNull(),
-  password: text('password').notNull(),
+  discord_id: text('discord_id'),
+  google_id: text('discord_id'),
+  github_id: text('discord_id'),
+  password: text('password'),
   bio: text('bio'),
-  image_url: text('image_url'),
-  banner_url: text('banner_url'),
+  image_id: text('image_url').references(() => Media.id),
+  banner_id: text('banner_url').references(() => Media.id),
   created_at: timestamp('created_at').defaultNow(),
 })
 
@@ -43,12 +63,15 @@ export const Post = pgTable('posts', {
   author_id: text('author_id')
     .notNull()
     .references(() => User.id),
-  community_id: text('Community_id')
-    .notNull()
-    .references(() => Community.id),
+  deleted_by: text('deleted_by').references(() => User.id),
+  target_type: PostTargetTypes('target_type').default('profile'),
+  target_id: text('target_id')
+    .notNull(),
   likes_count: integer('likes_count').default(0),
+  saves_count: integer('saves_count').default(0),
   comments_count: integer('comments_count').default(0),
   created_at: timestamp('created_at').defaultNow(),
+
 })
 
 export const Comment = pgTable(
@@ -61,7 +84,8 @@ export const Comment = pgTable(
       .notNull()
       .references(() => Post.id),
     content: text('content').notNull(),
-    image_url: text('image_url'),
+    source_url: text('image_url'),
+    type: MediaTargetTypes('type').notNull().default('image'),
     created_at: timestamp('created_at').defaultNow(),
   },
   table => ({
@@ -110,33 +134,18 @@ export const Save = pgTable(
   }),
 )
 
-export const Follower = pgTable(
+export const Relations = pgTable(
   'followers',
   {
     user_id: text('user_id')
       .notNull()
       .references(() => User.id),
-    follower_id: text('follower_id')
+    related_user_id: text('follower_id')
       .notNull()
       .references(() => User.id),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.follower_id] }),
-  }),
-)
-
-export const Following = pgTable(
-  'followings',
-  {
-    user_id: text('user_id')
-      .notNull()
-      .references(() => User.id),
-    following_id: text('following_id')
-      .notNull()
-      .references(() => User.id),
-  },
-  table => ({
-    pk: primaryKey({ columns: [table.user_id, table.following_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.related_user_id] }),
   }),
 )
 
@@ -172,25 +181,21 @@ export const Community_User = pgTable(
   }),
 )
 
-export const SourceUrl = pgTable('source_urls', {
-  id: text('id')
-    .primaryKey()
-    .notNull()
-    .default(sql`gen_random_uuid()`),
-  url: text('url').notNull(),
-  post_id: text('post_id')
-    .notNull()
-    .references(() => Post.id),
-  created_at: timestamp('created_at').defaultNow(),
-})
-
-export const userRelations = relations(User, ({ many }) => ({
+export const userRelations = relations(User, ({ many, one }) => ({
   posts: many(Post),
   comments: many(Comment),
   likes: many(Like),
   saves: many(Save),
   userBadges: many(User_Badge),
   communityUsers: many(Community_User),
+  image_url: one(Media, {
+    fields: [User.image_id],
+    references: [Media.id],
+  }),
+  banner_url: one(Media, {
+    fields: [User.banner_id],
+    references: [Media.id],
+  }),
 }))
 
 export const postRelations = relations(Post, ({ one, many }) => ({
@@ -198,14 +203,18 @@ export const postRelations = relations(Post, ({ one, many }) => ({
     fields: [Post.author_id],
     references: [User.id],
   }),
-  community: one(Community, {
-    fields: [Post.community_id],
-    references: [Community.id],
+  deleted_by: one(User, {
+    fields: [Post.deleted_by],
+    references: [User.id],
+  }),
+  target_id: one(User, {
+    fields: [Post.target_id],
+    references: [User.id],
   }),
   comments: many(Comment),
   likes: many(Like),
   saves: many(Save),
-  sourceUrls: many(SourceUrl),
+  medias: many(Media),
 }))
 
 export const commentRelations = relations(Comment, ({ one }) => ({
@@ -250,6 +259,11 @@ export const communityUserRelations = relations(Community_User, ({ one }) => ({
   }),
 }))
 
+export const RelationsRelations = relations(Relations, ({ one }) => ({
+  user_id: one(User, { fields: [Relations.user_id], references: [User.id] }),
+  related_user_id: one(User, { fields: [Relations.related_user_id], references: [User.id] }),
+}))
+
 export type UserSelect = typeof User.$inferSelect
 export type UserInsert = typeof User.$inferInsert
 export type PostSelect = typeof Post.$inferSelect
@@ -262,15 +276,13 @@ export type BadgeSelect = typeof Badge.$inferSelect
 export type BadgeInsert = typeof Badge.$inferInsert
 export type SaveSelect = typeof Save.$inferSelect
 export type SaveInsert = typeof Save.$inferInsert
-export type FollowerSelect = typeof Follower.$inferSelect
-export type FollowerInsert = typeof Follower.$inferInsert
-export type FollowingSelect = typeof Following.$inferSelect
-export type FollowingInsert = typeof Following.$inferInsert
 export type CommunitySelect = typeof Community.$inferSelect
 export type CommunityInsert = typeof Community.$inferInsert
 export type User_BadgeSelect = typeof User_Badge.$inferSelect
 export type User_BadgeInsert = typeof User_Badge.$inferInsert
 export type Community_UserSelect = typeof Community_User.$inferSelect
 export type Community_UserInsert = typeof Community_User.$inferInsert
-export type SourceUrlSelect = typeof SourceUrl.$inferSelect
-export type SourceUrlInsert = typeof SourceUrl.$inferInsert
+export type SourceUrlSelect = typeof Media.$inferSelect
+export type SourceUrlInsert = typeof Media.$inferInsert
+export type RelationsSelect = typeof Relations.$inferSelect
+export type RelationsInsert = typeof Relations.$inferInsert
