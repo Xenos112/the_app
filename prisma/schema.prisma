@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        String   @id @default(uuid())
+  user_name String   @unique
+  email     String   @unique
+  discord_id String?
+  google_id String?
+  github_id String?
+  password  String?
+  bio       String?
+  image_url  String?
+  banner_url String?
+  created_at DateTime @default(now())
+  Post Post[] @relation(name: "PostAuthor")
+  DeletedPost Post[] @relation(name: "PostDeletedBy")
+}
+
+model Community {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  description String?
+  image_id  String?
+  banner_id String?
+  members_count Int?
+  created_at DateTime @default(now())
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  content   String?
+  Author User? @relation(name: "PostAuthor", fields: [author_id], references: [id])
+  author_id String
+  Deleted_by User? @relation(name: "PostDeletedBy", fields: [deleted_by_id], references: [id])
+  deleted_by_id String?
+  target_type String?
+  target_id String?
+  likes_count Int?
+  saves_count Int?
+  comments_count Int?
+  created_at DateTime @default(now())
+
+  Media Media[] @relation(name: "MediaTarget")
+}
+
+model Comment {
+  id String @id @default(uuid())
+  user_id String?
+  post_id String?
+  content String?
+  source_url String?
+  type String?
+  created_at DateTime @default(now())
+}
+
+model Like {
+  user_id String
+  post_id String
+  @@id([user_id, post_id])
+}
+
+model Badge {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  description String?
+  image_id  String?
+  created_at DateTime @default(now())
+}
+
+model Save {
+  user_id String
+  post_id String
+  @@id([user_id, post_id])
+}
+
+model Relations {
+  user_id String
+  related_user_id String
+  @@id([user_id, related_user_id])
+}
+
+model User_Badge {
+  user_id String
+  badge_id String
+  created_at DateTime @default(now())
+  @@id([user_id, badge_id])
+}
+
+model Community_User {
+  user_id String
+  community_id String
+  created_at DateTime @default(now())
+  @@id([user_id, community_id])
+}
+
+model Media {
+  id String @id @default(uuid())
+  url String?
+  target_type String?
+  Target Post? @relation(name: "MediaTarget", fields: [target_id], references: [id])
+  target_id String?
+  created_at DateTime @default(now())
+}

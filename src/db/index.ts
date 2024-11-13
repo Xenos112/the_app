@@ -1,8 +1,17 @@
-import { config } from 'dotenv'
-import { drizzle } from 'drizzle-orm/node-postgres'
-import * as schema from './schema'
+import { PrismaClient } from '@prisma/client'
 
-config()
+function prismaClientSingleton() {
+  return new PrismaClient()
+}
 
-const db = drizzle(process.env.DATABASE_URL)
-export { db, schema }
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>
+// eslint-disable-next-line no-restricted-globals
+} & typeof global
+
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+
+export default prisma
+
+if (process.env.NODE_ENV !== 'production')
+  globalThis.prismaGlobal = prisma
