@@ -62,7 +62,7 @@ describe('post /auth/login', () => {
       method: 'POST',
       body: JSON.stringify({
         email: 'test@test.com',
-        password: '12334',
+        password: '123345678',
       }),
       headers: new Headers({ 'Content-Type': 'application/json' }),
     })
