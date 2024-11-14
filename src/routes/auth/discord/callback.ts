@@ -1,5 +1,5 @@
 import type { OAuth2Tokens } from 'arctic'
-import { discord, type DiscordUser } from '@/lib/oauth/discord'
+import { authenticate, discord, type DiscordUser } from '@/lib/oauth/discord'
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 
@@ -33,8 +33,9 @@ export default new Hono().get('/', async (c) => {
       Authorization: `Bearer ${tokens!.accessToken()}`,
     },
   })
-  const _discordUser = await discordUserResponse.json() as DiscordUser
+  const discordUser = await discordUserResponse.json() as DiscordUser
 
-  // todo: save the user in the database
-  return c.redirect('/', 302)
+  const user = await authenticate(discordUser)
+  console.log(user)
+  return c.json(user)
 })

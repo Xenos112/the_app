@@ -7,17 +7,31 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core'
 
+export const Media = pgTable('source_urls', {
+  id: text('id')
+    .primaryKey()
+    .notNull()
+    .default(sql`gen_random_uuid()`),
+  url: text('url').notNull(),
+  type: text('type').notNull(),
+  target_id: text('post_id')
+    .notNull(),
+  created_at: timestamp('created_at').defaultNow(),
+})
+
 export const User = pgTable('users', {
   id: text('id')
     .primaryKey()
     .notNull()
     .default(sql`gen_random_uuid()`),
-  user_name: text('user_name').notNull(),
+  user_name: text('user_name').notNull().unique(),
   email: text('email').notNull(),
-  password: text('password').notNull(),
+  github_id: text('github_id').unique(),
+  discord_id: text('discord_id').unique(),
+  password: text('password'),
   bio: text('bio'),
-  image_url: text('image_url'),
-  banner_url: text('banner_url'),
+  image_id: text('image_id').references(() => Media.id),
+  banner_id: text('banner_id').references(() => Media.id),
   created_at: timestamp('created_at').defaultNow(),
 })
 
@@ -110,33 +124,18 @@ export const Save = pgTable(
   }),
 )
 
-export const Follower = pgTable(
+export const Relations = pgTable(
   'followers',
   {
     user_id: text('user_id')
       .notNull()
       .references(() => User.id),
-    follower_id: text('follower_id')
+    related_user_id: text('related_user_id')
       .notNull()
       .references(() => User.id),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.follower_id] }),
-  }),
-)
-
-export const Following = pgTable(
-  'followings',
-  {
-    user_id: text('user_id')
-      .notNull()
-      .references(() => User.id),
-    following_id: text('following_id')
-      .notNull()
-      .references(() => User.id),
-  },
-  table => ({
-    pk: primaryKey({ columns: [table.user_id, table.following_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.related_user_id] }),
   }),
 )
 
@@ -172,25 +171,21 @@ export const Community_User = pgTable(
   }),
 )
 
-export const SourceUrl = pgTable('source_urls', {
-  id: text('id')
-    .primaryKey()
-    .notNull()
-    .default(sql`gen_random_uuid()`),
-  url: text('url').notNull(),
-  post_id: text('post_id')
-    .notNull()
-    .references(() => Post.id),
-  created_at: timestamp('created_at').defaultNow(),
-})
-
-export const userRelations = relations(User, ({ many }) => ({
+export const userRelations = relations(User, ({ many, one }) => ({
   posts: many(Post),
   comments: many(Comment),
   likes: many(Like),
   saves: many(Save),
   userBadges: many(User_Badge),
   communityUsers: many(Community_User),
+  image: one(Media, {
+    fields: [User.image_id],
+    references: [Media.id],
+  }),
+  banner: one(Media, {
+    fields: [User.banner_id],
+    references: [Media.id],
+  }),
 }))
 
 export const postRelations = relations(Post, ({ one, many }) => ({
@@ -205,7 +200,7 @@ export const postRelations = relations(Post, ({ one, many }) => ({
   comments: many(Comment),
   likes: many(Like),
   saves: many(Save),
-  sourceUrls: many(SourceUrl),
+  sourceUrls: many(Media),
 }))
 
 export const commentRelations = relations(Comment, ({ one }) => ({
@@ -250,6 +245,17 @@ export const communityUserRelations = relations(Community_User, ({ one }) => ({
   }),
 }))
 
+export const RelationRelations = relations(Relations, ({ one }) => ({
+  user: one(User, {
+    fields: [Relations.user_id],
+    references: [User.id],
+  }),
+  related_user: one(User, {
+    fields: [Relations.related_user_id],
+    references: [User.id],
+  }),
+}))
+
 export type UserSelect = typeof User.$inferSelect
 export type UserInsert = typeof User.$inferInsert
 export type PostSelect = typeof Post.$inferSelect
@@ -262,15 +268,13 @@ export type BadgeSelect = typeof Badge.$inferSelect
 export type BadgeInsert = typeof Badge.$inferInsert
 export type SaveSelect = typeof Save.$inferSelect
 export type SaveInsert = typeof Save.$inferInsert
-export type FollowerSelect = typeof Follower.$inferSelect
-export type FollowerInsert = typeof Follower.$inferInsert
-export type FollowingSelect = typeof Following.$inferSelect
-export type FollowingInsert = typeof Following.$inferInsert
 export type CommunitySelect = typeof Community.$inferSelect
 export type CommunityInsert = typeof Community.$inferInsert
 export type User_BadgeSelect = typeof User_Badge.$inferSelect
 export type User_BadgeInsert = typeof User_Badge.$inferInsert
 export type Community_UserSelect = typeof Community_User.$inferSelect
 export type Community_UserInsert = typeof Community_User.$inferInsert
-export type SourceUrlSelect = typeof SourceUrl.$inferSelect
-export type SourceUrlInsert = typeof SourceUrl.$inferInsert
+export type SourceUrlSelect = typeof Media.$inferSelect
+export type SourceUrlInsert = typeof Media.$inferInsert
+export type RelationsSelect = typeof Relations.$inferSelect
+export type RelationsInsert = typeof Relations.$inferInsert
