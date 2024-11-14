@@ -34,7 +34,6 @@ export default new Hono().get('/', async (c) => {
     },
   })
   const githubUser = await githubUserResponse.json() as GitHubUser
-  console.log(githubUser)
   const user = await authenticate(githubUser)
   return c.json(user)
 })

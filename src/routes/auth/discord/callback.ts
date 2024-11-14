@@ -36,6 +36,5 @@ export default new Hono().get('/', async (c) => {
   const discordUser = await discordUserResponse.json() as DiscordUser
 
   const user = await authenticate(discordUser)
-  console.log(user)
   return c.json(user)
 })
