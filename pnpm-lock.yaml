@@ -11,6 +11,9 @@ importers:
       '@hono/node-server':
         specifier: ^1.13.5
         version: 1.13.5(hono@4.6.9)
+      '@hono/zod-validator':
+        specifier: ^0.4.1
+        version: 0.4.1(hono@4.6.9)(zod@3.23.8)
       arctic:
         specifier: ^2.2.2
         version: 2.2.2
@@ -779,6 +782,12 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
+
+  '@hono/zod-validator@0.4.1':
+    resolution: {integrity: sha512-I8LyfeJfvVmC5hPjZ2Iij7RjexlgSBT7QJudZ4JvNPLxn0JQ3sqclz2zydlwISAnw21D2n4LQ0nfZdoiv9fQQA==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.19.1
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3233,6 +3242,11 @@ snapshots:
   '@hono/node-server@1.13.5(hono@4.6.9)':
     dependencies:
       hono: 4.6.9
+
+  '@hono/zod-validator@0.4.1(hono@4.6.9)(zod@3.23.8)':
+    dependencies:
+      hono: 4.6.9
+      zod: 3.23.8
 
   '@humanfs/core@0.19.1': {}
 
