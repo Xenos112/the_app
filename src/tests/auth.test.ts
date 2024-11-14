@@ -69,8 +69,37 @@ describe('post /auth/login', () => {
     const body = await res.json() as string[]
     expect(body).toBeDefined()
     expect(body).toEqual({
-      message: 'user not found',
+      message: 'User not found',
     })
+    expect(res.status).toBe(404)
+  })
+})
+
+describe('post /auth/sign-in', () => {
+  it('should return two errors with status 400', async () => {
+    const res = await app.request('/auth/sign-in', {
+      body: JSON.stringify('testing'),
+      method: 'POST',
+    })
+    const body = await res.json() as string[]
+    expect(body).toBeDefined()
+    expect(body[0]).toBe('Email is required')
+    expect(body[1]).toBe('Password is required')
+    expect(res.status).toBe(400)
+  })
+
+  it('should throw one error with status 400 and email error', async () => {
+    const res = await app.request('/auth/sign-in', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: 'test',
+        password: '12345678',
+      }),
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+    })
+    const body = await res.json() as string[]
+    expect(body).toBeDefined()
+    expect(body[0]).toBe('Email is invalid')
     expect(res.status).toBe(400)
   })
 })
