@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-unsafe-assignment */
 import { z } from 'zod'
 
 export const LoginSchema = z.object({
