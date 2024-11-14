@@ -1,14 +1,8 @@
-import prisma from '@/db'
+import { db } from '@/db'
+import { User } from '@/db/schema'
 
 async function main() {
-  const users = await prisma.user.findMany()
-  for (const user of users) {
-    await prisma.user.delete({
-      where: {
-        id: user.id,
-      },
-    })
-  }
+  await db.delete(User)
 }
 
 void main()
