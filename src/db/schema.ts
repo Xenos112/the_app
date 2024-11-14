@@ -25,7 +25,7 @@ export const User = pgTable('users', {
     .notNull()
     .default(sql`gen_random_uuid()`),
   user_name: text('user_name').notNull().unique(),
-  email: text('email').notNull(),
+  email: text('email').unique(),
   github_id: text('github_id').unique(),
   discord_id: text('discord_id').unique(),
   password: text('password'),
