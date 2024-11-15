@@ -1,3 +1,4 @@
+
 import { relations, sql } from 'drizzle-orm'
 import {
   integer,
@@ -7,7 +8,7 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core'
 
-export const Media = pgTable('source_urls', {
+export const Media = pgTable('medias', {
   id: text('id')
     .primaryKey()
     .notNull()
@@ -197,10 +198,10 @@ export const postRelations = relations(Post, ({ one, many }) => ({
     fields: [Post.community_id],
     references: [Community.id],
   }),
+  medias: many(Media),
   comments: many(Comment),
   likes: many(Like),
   saves: many(Save),
-  sourceUrls: many(Media),
 }))
 
 export const commentRelations = relations(Comment, ({ one }) => ({
