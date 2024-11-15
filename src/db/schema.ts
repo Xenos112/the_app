@@ -1,46 +1,52 @@
-
-import { relations, sql } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import {
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
+  uuid,
 } from 'drizzle-orm/pg-core'
 
+export const userRoles = pgEnum('user_roles', ['User', 'Admin', 'Creator'])
+export const mediaTypes = pgEnum('media_types', ['image', 'video'])
+export const mediaTargetTypes = pgEnum('media_target_types', ['user:image', 'user:banner', 'post'])
+
 export const Media = pgTable('medias', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
     .notNull()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   url: text('url').notNull(),
-  type: text('type').notNull(),
-  target_id: text('post_id')
+  type: mediaTypes('type').notNull().default('image'),
+  target_type: mediaTargetTypes('target_type').notNull().default('post'),
+  target_id: text('target_id')
     .notNull(),
   created_at: timestamp('created_at').defaultNow(),
 })
 
 export const User = pgTable('users', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
     .notNull()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   user_name: text('user_name').notNull().unique(),
   email: text('email').unique(),
   github_id: text('github_id').unique(),
   discord_id: text('discord_id').unique(),
   password: text('password'),
   bio: text('bio'),
-  image_id: text('image_id').references(() => Media.id),
-  banner_id: text('banner_id').references(() => Media.id),
+  image_id: uuid('image_id').references(() => Media.id, { onDelete: 'cascade' }),
+  banner_id: uuid('banner_id').references(() => Media.id, { onDelete: 'cascade' }),
   created_at: timestamp('created_at').defaultNow(),
 })
 
 export const Community = pgTable('communities', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
     .notNull()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   image_url: text('image_url').notNull(),
@@ -50,17 +56,16 @@ export const Community = pgTable('communities', {
 })
 
 export const Post = pgTable('posts', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
     .notNull()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   content: text('content'),
-  author_id: text('author_id')
+  author_id: uuid('author_id')
     .notNull()
-    .references(() => User.id),
-  community_id: text('Community_id')
-    .notNull()
-    .references(() => Community.id),
+    .references(() => User.id, { onDelete: 'cascade' }),
+  community_id: uuid('Community_id')
+    .references(() => Community.id, { onDelete: 'cascade' }),
   likes_count: integer('likes_count').default(0),
   comments_count: integer('comments_count').default(0),
   created_at: timestamp('created_at').defaultNow(),
@@ -69,41 +74,41 @@ export const Post = pgTable('posts', {
 export const Comment = pgTable(
   'comments',
   {
-    user_id: text('user_id')
+    user_id: uuid('user_id')
       .notNull()
-      .references(() => User.id),
-    post_id: text('post_id')
+      .references(() => User.id, { onDelete: 'cascade' }),
+    post_id: uuid('post_id')
       .notNull()
-      .references(() => Post.id),
+      .references(() => Post.id, { onDelete: 'cascade' }),
     content: text('content').notNull(),
     image_url: text('image_url'),
     created_at: timestamp('created_at').defaultNow(),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.post_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.post_id], name: 'pk_comments' }),
   }),
 )
 
 export const Like = pgTable(
   'likes',
   {
-    user_id: text('user_id')
+    user_id: uuid('user_id')
       .notNull()
-      .references(() => User.id),
-    post_id: text('post_id')
+      .references(() => User.id, { onDelete: 'cascade' }),
+    post_id: uuid('post_id')
       .notNull()
-      .references(() => Post.id),
+      .references(() => Post.id, { onDelete: 'cascade' }),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.post_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.post_id], name: 'pk_likes' }),
   }),
 )
 
 export const Badge = pgTable('badges', {
-  id: text('id')
+  id: uuid('id')
     .primaryKey()
     .notNull()
-    .default(sql`gen_random_uuid()`),
+    .defaultRandom(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   image_url: text('image_url').notNull(),
@@ -113,62 +118,63 @@ export const Badge = pgTable('badges', {
 export const Save = pgTable(
   'saves',
   {
-    user_id: text('user_id')
+    user_id: uuid('user_id')
       .notNull()
-      .references(() => User.id),
-    post_id: text('post_id')
+      .references(() => User.id, { onDelete: 'cascade' }),
+    post_id: uuid('post_id')
       .notNull()
-      .references(() => Post.id),
+      .references(() => Post.id, { onDelete: 'cascade' }),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.post_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.post_id], name: 'pk_saves' }),
   }),
 )
 
 export const Relations = pgTable(
   'followers',
   {
-    user_id: text('user_id')
+    user_id: uuid('user_id')
       .notNull()
-      .references(() => User.id),
-    related_user_id: text('related_user_id')
+      .references(() => User.id, { onDelete: 'cascade' }),
+    related_user_id: uuid('related_user_id')
       .notNull()
-      .references(() => User.id),
+      .references(() => User.id, { onDelete: 'cascade' }),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.related_user_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.related_user_id], name: 'pk_relations' }),
   }),
 )
 
 export const User_Badge = pgTable(
   'user_badges',
   {
-    user_id: text('user_id')
+    user_id: uuid('user_id')
       .notNull()
-      .references(() => User.id),
-    badge_id: text('badge_id')
+      .references(() => User.id, { onDelete: 'cascade' }),
+    badge_id: uuid('badge_id')
       .notNull()
-      .references(() => Badge.id),
+      .references(() => Badge.id, { onDelete: 'cascade' }),
     created_at: timestamp('created_at').defaultNow(),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.badge_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.badge_id], name: 'user__badge' }),
   }),
 )
 
 export const Community_User = pgTable(
   'community_users',
   {
-    user_id: text('user_id')
+    user_id: uuid('user_id')
       .notNull()
-      .references(() => User.id),
-    community_id: text('community_id')
+      .references(() => User.id, { onDelete: 'cascade' }),
+    community_id: uuid('community_id')
       .notNull()
-      .references(() => Community.id),
+      .references(() => Community.id, { onDelete: 'cascade' }),
+    role: userRoles('role').notNull().default('User'),
     created_at: timestamp('created_at').defaultNow(),
   },
   table => ({
-    pk: primaryKey({ columns: [table.user_id, table.community_id] }),
+    pk: primaryKey({ columns: [table.user_id, table.community_id], name: 'user__community' }),
   }),
 )
 
@@ -198,7 +204,6 @@ export const postRelations = relations(Post, ({ one, many }) => ({
     fields: [Post.community_id],
     references: [Community.id],
   }),
-  medias: many(Media),
   comments: many(Comment),
   likes: many(Like),
   saves: many(Save),
@@ -211,6 +216,28 @@ export const commentRelations = relations(Comment, ({ one }) => ({
   }),
   post: one(Post, {
     fields: [Comment.post_id],
+    references: [Post.id],
+  }),
+}))
+
+export const likeRelations = relations(Like, ({ one }) => ({
+  user: one(User, {
+    fields: [Like.user_id],
+    references: [User.id],
+  }),
+  post: one(Post, {
+    fields: [Like.post_id],
+    references: [Post.id],
+  }),
+}))
+
+export const saveRelations = relations(Save, ({ one }) => ({
+  user: one(User, {
+    fields: [Save.user_id],
+    references: [User.id],
+  }),
+  post: one(Post, {
+    fields: [Save.post_id],
     references: [Post.id],
   }),
 }))
