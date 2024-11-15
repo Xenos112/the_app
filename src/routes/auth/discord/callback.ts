@@ -1,7 +1,8 @@
 import type { OAuth2Tokens } from 'arctic'
 import { authenticate, discord, type DiscordUser } from '@/lib/oauth/discord'
+import { generateToken } from '@/utils/generate-token'
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
+import { getCookie, setCookie } from 'hono/cookie'
 
 export default new Hono().get('/', async (c) => {
   const url = new URL(c.req.url)
@@ -36,5 +37,10 @@ export default new Hono().get('/', async (c) => {
   const discordUser = await discordUserResponse.json() as DiscordUser
 
   const user = await authenticate(discordUser)
+  const authToken = generateToken(user!.id)
+  setCookie(c, 'auth_token', authToken, {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+  })
   return c.json(user)
 })

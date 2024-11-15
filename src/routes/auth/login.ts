@@ -6,6 +6,7 @@ import { zValidator } from '@hono/zod-validator'
 import * as bcrypt from 'bcrypt'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { setCookie } from 'hono/cookie'
 
 export default new Hono().post('/', zValidator('json', LoginSchema, (res, c) => {
   if (!res.success) {
@@ -30,6 +31,10 @@ export default new Hono().post('/', zValidator('json', LoginSchema, (res, c) => 
     }
 
     const token = generateToken(user.id)
+    setCookie(c, 'auth_token', token, {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+    })
     return c.json({ user, token })
   }
   catch (error) {

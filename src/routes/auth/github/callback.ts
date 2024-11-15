@@ -1,7 +1,8 @@
 import type { OAuth2Tokens } from 'arctic'
 import { authenticate, github, type GitHubUser } from '@/lib/oauth/github'
+import { generateToken } from '@/utils/generate-token'
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
+import { getCookie, setCookie } from 'hono/cookie'
 
 export default new Hono().get('/', async (c) => {
   const url = new URL(c.req.url)
@@ -35,5 +36,10 @@ export default new Hono().get('/', async (c) => {
   })
   const githubUser = await githubUserResponse.json() as GitHubUser
   const user = await authenticate(githubUser)
+  const authToken = generateToken(user!.id)
+  setCookie(c, 'auth_token', authToken, {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+  })
   return c.json(user)
 })

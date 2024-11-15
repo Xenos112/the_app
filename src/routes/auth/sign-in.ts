@@ -3,9 +3,10 @@ import { User } from '@/db/schema'
 import { generateToken } from '@/utils/generate-token'
 import { RegisterSchema } from '@/validators/auth'
 import { zValidator } from '@hono/zod-validator'
-import bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt'
 import { eq, or } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { setCookie } from 'hono/cookie'
 
 export default new Hono()
   .post('/', zValidator('json', RegisterSchema, (res, c) => {
@@ -21,9 +22,13 @@ export default new Hono()
         return c.json({ error: 'User already exists' }, 400)
       }
 
-      const passwordHash = await bcrypt.hash(password, 10) as string
+      const passwordHash = await bcrypt.hash(password, 10)
       const user = await db.insert(User).values({ email, password: passwordHash, user_name }).returning()
       const token = generateToken(user.at(0)!.id)
+      setCookie(c, 'auth_token', token, {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+      })
       return c.json({ user, token })
     }
     catch (error) {
