@@ -1,13 +1,17 @@
 import { serve } from '@hono/node-server'
 import { config } from 'dotenv'
 import { Hono } from 'hono'
-import auth from './routes/auth'
+import { logger } from 'hono/logger'
+import routes from './routes'
 
 config()
 
-export const app = new Hono().route('/auth', auth)
+export const app = new Hono()
+  .use(logger())
+  .route('/', routes)
 
-const port = 3000
+console.log(app.routes)
+const port = 4000
 serve({
   fetch: app.fetch,
   port,
