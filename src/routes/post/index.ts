@@ -66,3 +66,21 @@ export default new Hono()
       return c.json({ error, deleted: false })
     }
   })
+  .get('/:id/likes', zValidator('param', RouteValidator, (res, c) => {
+    if (!res.success) {
+      const errors = res.error.issues.map(error => error.message)
+      return c.json(errors, 400)
+    }
+  }), async (c) => {
+    try {
+      const { id } = c.req.valid('param')
+      const post = await getPostById(id)
+      if (post === null) {
+        return c.json({ message: 'Post not found' }, 404)
+      }
+      return c.json({ likes: post.likes_count })
+    }
+    catch (error) {
+      return c.json({ error }, 500)
+    }
+  })
