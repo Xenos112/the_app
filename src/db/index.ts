@@ -4,4 +4,4 @@ import * as schema from './schema'
 
 config()
 
-export const db = drizzle(process.env.DATABASE_URL, { logger: true, schema })
+export const db = drizzle(process.env.DATABASE_URL, { logger: true, schema, casing: 'snake_case' })
