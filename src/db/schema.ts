@@ -85,7 +85,7 @@ export const Comment = pgTable(
     content: text('content'),
     image_url: text('image_url'),
     created_at: timestamp('created_at').defaultNow(),
-  }
+  },
 )
 
 export const Like = pgTable(

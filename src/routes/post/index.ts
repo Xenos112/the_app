@@ -291,13 +291,11 @@ export default new Hono()
   })
   .post('/:id/comments', zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
-      console.log('here 1')
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
   }), zValidator('json', CommentValidator, (res, c) => {
     if (!res.success) {
-      console.log('here 2')
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
