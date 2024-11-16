@@ -21,6 +21,11 @@ const CommentValidator = z.object({
   message: 'Either content or image_url must be provided',
 })
 
+const DeleteRouteValidator = z.object({
+  id: uuid,
+  comment_id: uuid,
+})
+
 export default new Hono()
   .get('/:id', zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
@@ -323,6 +328,47 @@ export default new Hono()
         user_id: user.id,
       }).returning()
       return c.json(comment[0])
+    }
+    catch (error) {
+      log(error)
+      return c.json('internal server error', 500)
+    }
+  })
+  .delete('/:id/comments/:comment_id', zValidator('param', DeleteRouteValidator, (res, c) => {
+    if (!res.success) {
+      const errors = res.error.issues.map(error => error.message)
+      return c.json(errors, 400)
+    }
+  }), async (c) => {
+    try {
+      const { id, comment_id } = c.req.valid('param')
+
+      const token = getCookie(c, 'auth_token')
+      if (token === undefined) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const user = await validateToken(token)
+      if (!user) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const post = await getPostById(id)
+      if (post === null) {
+        return c.json({ message: 'Post not found' }, 404)
+      }
+
+      const comment = await db.select().from(Comment).where(and(eq(Comment.id, comment_id), eq(Comment.post_id, id))).limit(1)
+      if (comment.length === 0) {
+        return c.json({ message: 'Comment not found' }, 404)
+      }
+
+      if (comment[0].user_id !== user.id) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      await db.delete(Comment).where(and(eq(Comment.id, comment_id), eq(Comment.post_id, id)))
+      return c.json({ message: 'Comment deleted' })
     }
     catch (error) {
       log(error)
