@@ -75,10 +75,13 @@ export default new Hono()
     try {
       const { id } = c.req.valid('param')
       const post = await getPostById(id)
+      const token = getCookie(c, 'auth_token')
+      const user = await validateToken(token ?? '')
       if (post === null) {
         return c.json({ message: 'Post not found' }, 404)
       }
-      const isLikedByAuthenticatedUser = await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, post.author_id))).limit(1)
+      const isLikedByAuthenticatedUser = user ? await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id))).limit(1) : []
+      console.log(isLikedByAuthenticatedUser)
       return c.json({ likes: post.likes_count, liked: isLikedByAuthenticatedUser.length > 0 })
     }
     catch (error) {
@@ -165,20 +168,14 @@ export default new Hono()
     try {
       const { id } = c.req.valid('param')
       const token = getCookie(c, 'auth_token')
-      if (token === undefined) {
-        return c.json({ message: 'Unauthorized' }, 401)
-      }
-      
-      const user = await validateToken(token)
-      if (!user) {
-        return c.json({ message: 'Unauthorized' }, 401)
-      }
-
+      const user = await validateToken(token ?? '')
       const post = await getPostById(id)
       if (post === null) {
         return c.json({ message: 'Post not found' }, 404)
       }
-      return c.json({ saved: true })
+
+      const isSavedByAuthenticatedUser = user ? await db.select().from(Post).where(and(eq(Post.id, id), eq(Post.author_id, user.id))).limit(1): []
+      return c.json({ saves: post.saves_count, saved: isSavedByAuthenticatedUser.length > 0 })
     }
     catch (error) {
       return c.json({ error }, 500)
