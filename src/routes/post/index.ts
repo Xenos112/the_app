@@ -115,7 +115,7 @@ export default new Hono()
         post_id: post.id,
         user_id: user.id,
       })
-
+      await db.update(Post).set({ likes_count: post.likes_count! + 1  }).where(eq(Post.id, id))
       return c.json({ liked: true })
     }
     catch (error) {
@@ -147,10 +147,40 @@ export default new Hono()
       }
 
       await db.delete(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id)))
+      await db.update(Post).set({ likes_count: post.likes_count! - 1  }).where(eq(Post.id, id))
       return c.json({ unliked: true })
     }
     catch (error) {
       console.log(error)
       return c.json('internal server error', 500)
+    }
+  })
+  .get('/:id/saves', zValidator('param', RouteValidator, (res, c) => {
+    if (!res.success) {
+      const errors = res.error.issues.map(error => error.message)
+      return c.json(errors, 400)
+    }
+  }), async (c) => {
+    try {
+      const { id } = c.req.valid('param')
+      const token = getCookie(c, 'auth_token')
+      if (token === undefined) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+      
+      const user = await validateToken(token)
+      if (!user) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const post = await getPostById(id)
+      if (post === null) {
+        return c.json({ message: 'Post not found' }, 404)
+      }
+
+      return c.json({ saves: post.saves_count })
+    }
+    catch (error) {
+      return c.json({ error }, 500)
     }
   })
