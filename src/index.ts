@@ -11,7 +11,7 @@ export const app = new Hono()
   .route('/', routes)
 
 console.log(app.routes)
-const port = 4000
+const port = process.env.NODE_ENV === 'test' ? 0 : 4000
 serve({
   fetch: app.fetch,
   port,
