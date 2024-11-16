@@ -1,10 +1,10 @@
 import { db } from '@/db'
-import { Post } from '@/db/schema'
-import getPostById from '@/features/post/lib/delete-post-by-id'
+import { Like, Post } from '@/db/schema'
+import getPostById from '@/features/post/lib/get-post-by-id'
 import validateToken from '@/utils/validate-token'
 import { uuid } from '@/validators'
 import { zValidator } from '@hono/zod-validator'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { z } from 'zod'
@@ -82,5 +82,44 @@ export default new Hono()
     }
     catch (error) {
       return c.json({ error }, 500)
+    }
+  })
+  .put('/:id/likes', zValidator('param', RouteValidator, (res, c) => {
+    if (!res.success) {
+      const errors = res.error.issues.map(error => error.message)
+      return c.json(errors, 400)
+    }
+  }), async (c) => {
+    try {
+      const { id } = c.req.valid('param')
+      const token = getCookie(c, 'auth_token')
+      if (token === undefined) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const user = await validateToken(token)
+      if (!user) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const post = await getPostById(id)
+      if (post === null) {
+        return c.json({ message: 'Post not found' }, 404)
+      }
+
+      const postLiked = await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id))).limit(1)
+      if (postLiked.length > 0) {
+        return c.json({ liked: true })
+      }
+      await db.insert(Like).values({
+        post_id: post.id,
+        user_id: user.id,
+      })
+
+      return c.json({ liked: true })
+    }
+    catch (error) {
+      console.log(error)
+      return c.json('internal server error', 500)
     }
   })
