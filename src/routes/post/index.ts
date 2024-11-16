@@ -78,7 +78,8 @@ export default new Hono()
       if (post === null) {
         return c.json({ message: 'Post not found' }, 404)
       }
-      return c.json({ likes: post.likes_count })
+      const isLikedByAuthenticatedUser = await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, post.author_id))).limit(1)
+      return c.json({ likes: post.likes_count, liked: isLikedByAuthenticatedUser.length > 0 })
     }
     catch (error) {
       return c.json({ error }, 500)
@@ -177,8 +178,7 @@ export default new Hono()
       if (post === null) {
         return c.json({ message: 'Post not found' }, 404)
       }
-
-      return c.json({ saves: post.saves_count })
+      return c.json({ saved: true })
     }
     catch (error) {
       return c.json({ error }, 500)
