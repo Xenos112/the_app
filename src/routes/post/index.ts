@@ -1,3 +1,4 @@
+import { log } from 'node:console'
 import { db } from '@/db'
 import { Like, Post, Save } from '@/db/schema'
 import getPostById from '@/features/post/lib/get-post-by-id'
@@ -81,7 +82,6 @@ export default new Hono()
         return c.json({ message: 'Post not found' }, 404)
       }
       const isLikedByAuthenticatedUser = user ? await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id))).limit(1) : []
-      console.log(isLikedByAuthenticatedUser)
       return c.json({ likes: post.likes_count, liked: isLikedByAuthenticatedUser.length > 0 })
     }
     catch (error) {
@@ -119,11 +119,11 @@ export default new Hono()
         post_id: post.id,
         user_id: user.id,
       })
-      await db.update(Post).set({ likes_count: post.likes_count! + 1  }).where(eq(Post.id, id))
+      await db.update(Post).set({ likes_count: post.likes_count! + 1 }).where(eq(Post.id, id))
       return c.json({ liked: true })
     }
     catch (error) {
-      console.log(error)
+      log(error)
       return c.json('internal server error', 500)
     }
   })
@@ -151,11 +151,11 @@ export default new Hono()
       }
 
       await db.delete(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id)))
-      await db.update(Post).set({ likes_count: post.likes_count! - 1  }).where(eq(Post.id, id))
+      await db.update(Post).set({ likes_count: post.likes_count! - 1 }).where(eq(Post.id, id))
       return c.json({ unliked: true })
     }
     catch (error) {
-      console.log(error)
+      log(error)
       return c.json('internal server error', 500)
     }
   })
@@ -174,19 +174,19 @@ export default new Hono()
         return c.json({ message: 'Post not found' }, 404)
       }
 
-      const isSavedByAuthenticatedUser = user ? await db.select().from(Save).where(and(eq(Save.user_id, user.id), eq(Save.post_id, id))).limit(1): []
+      const isSavedByAuthenticatedUser = user ? await db.select().from(Save).where(and(eq(Save.user_id, user.id), eq(Save.post_id, id))).limit(1) : []
       return c.json({ saves: post.saves_count, saved: isSavedByAuthenticatedUser.length > 0 })
     }
     catch (error) {
       return c.json({ error }, 500)
     }
   })
-  .put('/:id/saves', zValidator('param',RouteValidator,(res,c) =>{
-    if(!res.success){
+  .put('/:id/saves', zValidator('param', RouteValidator, (res, c) => {
+    if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
-  }),async (c) =>{
+  }), async (c) => {
     try {
       const { id } = c.req.valid('param')
       const token = getCookie(c, 'auth_token')
@@ -214,10 +214,12 @@ export default new Hono()
         user_id: user.id,
       })
 
-      await db.update(Post).set({ saves_count: post.saves_count! + 1  }).where(eq(Post.id, id))
+      await db.update(Post).set({ saves_count: post.saves_count! + 1 }).where(eq(Post.id, id))
 
       return c.json({ saved: true })
-    } catch (error) {
+    }
+    catch (error) {
+      log(error)
       return c.json('internal server error', 500)
     }
   })
@@ -245,10 +247,11 @@ export default new Hono()
       }
 
       await db.delete(Save).where(and(eq(Save.post_id, id), eq(Save.user_id, user.id)))
-      await db.update(Post).set({ saves_count: post.saves_count! - 1  }).where(eq(Post.id, id))
+      await db.update(Post).set({ saves_count: post.saves_count! - 1 }).where(eq(Post.id, id))
       return c.json({ unsave: true })
     }
     catch (error) {
+      log(error)
       return c.json('internal server error', 500)
     }
   })
