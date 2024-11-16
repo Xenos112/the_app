@@ -67,6 +67,7 @@ export const Post = pgTable('posts', {
   community_id: uuid('Community_id')
     .references(() => Community.id, { onDelete: 'cascade' }),
   likes_count: integer('likes_count').default(0),
+  saves_count: integer('saves_count').default(0),
   comments_count: integer('comments_count').default(0),
   created_at: timestamp('created_at').defaultNow(),
 })
