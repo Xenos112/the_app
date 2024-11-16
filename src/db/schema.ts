@@ -75,19 +75,17 @@ export const Post = pgTable('posts', {
 export const Comment = pgTable(
   'comments',
   {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
     user_id: uuid('user_id')
       .notNull()
       .references(() => User.id, { onDelete: 'cascade' }),
     post_id: uuid('post_id')
       .notNull()
       .references(() => Post.id, { onDelete: 'cascade' }),
-    content: text('content').notNull(),
+    content: text('content'),
     image_url: text('image_url'),
     created_at: timestamp('created_at').defaultNow(),
-  },
-  table => ({
-    pk: primaryKey({ columns: [table.user_id, table.post_id], name: 'pk_comments' }),
-  }),
+  }
 )
 
 export const Like = pgTable(

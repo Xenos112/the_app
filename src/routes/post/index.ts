@@ -14,6 +14,13 @@ const RouteValidator = z.object({
   id: uuid,
 })
 
+const CommentValidator = z.object({
+  content: z.string().nullable().optional(),
+  image_url: z.string().nullable().optional(),
+}).refine(data => data.content !== null || data.image_url !== null, {
+  message: 'Either content or image_url must be provided',
+})
+
 export default new Hono()
   .get('/:id', zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
@@ -271,6 +278,51 @@ export default new Hono()
       }
       const comments = await db.select().from(Comment).where(eq(Comment.post_id, id)).limit(10)
       return c.json(comments)
+    }
+    catch (error) {
+      log(error)
+      return c.json('internal server error', 500)
+    }
+  })
+  .post('/:id/comments', zValidator('param', RouteValidator, (res, c) => {
+    if (!res.success) {
+      console.log('here 1')
+      const errors = res.error.issues.map(error => error.message)
+      return c.json(errors, 400)
+    }
+  }), zValidator('json', CommentValidator, (res, c) => {
+    if (!res.success) {
+      console.log('here 2')
+      const errors = res.error.issues.map(error => error.message)
+      return c.json(errors, 400)
+    }
+  }), async (c) => {
+    try {
+      const { id } = c.req.valid('param')
+      const { content, image_url } = c.req.valid('json')
+
+      const token = getCookie(c, 'auth_token')
+      if (token === undefined) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const user = await validateToken(token)
+      if (!user) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const post = await getPostById(id)
+      if (post === null) {
+        return c.json({ message: 'Post not found' }, 404)
+      }
+
+      const comment = await db.insert(Comment).values({
+        image_url,
+        content,
+        post_id: id,
+        user_id: user.id,
+      }).returning()
+      return c.json(comment[0])
     }
     catch (error) {
       log(error)
