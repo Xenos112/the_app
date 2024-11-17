@@ -1,14 +1,16 @@
-import addComment from '@/controllers/post/comments/add-comment'
-import getPostComments from '@/controllers/post/comments/get-post-comments'
-import deletePostById from '@/controllers/post/delete-post-by-id'
-import getPostById from '@/controllers/post/get-post-by-id'
-import getPostLike from '@/controllers/post/likes/get-post-like'
-import likePost from '@/controllers/post/likes/like-a-post'
-import unlikePost from '@/controllers/post/likes/unlike-a-post'
-import deleteCommentById from '@/controllers/post/saves/delete-comment-by-id'
-import getPostSaves from '@/controllers/post/saves/get-post-save'
-import savePost from '@/controllers/post/saves/save-a-post'
-import unsavePost from '@/controllers/post/saves/unsave-a-post'
+import {
+  addComment,
+  deleteCommentById,
+  deletePostById,
+  getPostById,
+  getPostComments,
+  getPostLike,
+  getPostSaves,
+  likePost,
+  savePost,
+  unlikePost,
+  unsavePost,
+} from '@/controllers'
 import { uuid } from '@/validators'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
