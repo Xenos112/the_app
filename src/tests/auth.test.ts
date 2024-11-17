@@ -1,8 +1,8 @@
 import { app } from '@/index'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 describe('post /auth/login', () => {
-  it('should return two errors with status 400', async () => {
+  test('should return two errors with status 400', async () => {
     const res = await app.request('/auth/login', {
       body: JSON.stringify('testing'),
       method: 'POST',
@@ -14,7 +14,7 @@ describe('post /auth/login', () => {
     expect(res.status).toBe(400)
   })
 
-  it('should validate email and password and return 400', async () => {
+  test('should validate email and password and return 400', async () => {
     const res = await app.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({
@@ -29,7 +29,7 @@ describe('post /auth/login', () => {
     expect(res.status).toBe(400)
   })
 
-  it('should pass the email but throws for wrong password', async () => {
+  test('should pass the email but throws for wrong password', async () => {
     const res = await app.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({
@@ -43,7 +43,7 @@ describe('post /auth/login', () => {
     expect(body[0]).toBe('Password must be at least 8 characters')
     expect(res.status).toBe(400)
   })
-  it('should pass the password but throws for wrong email', async () => {
+  test('should pass the password but throws for wrong email', async () => {
     const res = await app.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({
@@ -57,7 +57,7 @@ describe('post /auth/login', () => {
     expect(body[0]).toBe('Email is invalid')
     expect(res.status).toBe(400)
   })
-  it('should return error with `not found` message', async () => {
+  test('should return error with `not found` message', async () => {
     const res = await app.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({
@@ -76,7 +76,7 @@ describe('post /auth/login', () => {
 })
 
 describe('post /auth/sign-in', () => {
-  it('should return two errors with status 400', async () => {
+  test('should return two errors with status 400', async () => {
     const res = await app.request('/auth/sign-in', {
       body: JSON.stringify('testing'),
       method: 'POST',
@@ -88,7 +88,7 @@ describe('post /auth/sign-in', () => {
     expect(res.status).toBe(400)
   })
 
-  it('should throw one error with status 400 and email error', async () => {
+  test('should throw one error with status 400 and email error', async () => {
     const res = await app.request('/auth/sign-in', {
       method: 'POST',
       body: JSON.stringify({

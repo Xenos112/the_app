@@ -10,5 +10,6 @@ export default antfu({
     'ts/no-unsafe-member-access': 'off',
     'no-console': 'warn',
     'ts/no-unsafe-argument': 'off',
+    'test/consistent-test-it': 'off',
   },
 })
