@@ -1,3 +1,4 @@
+import { log } from 'node:console'
 import { serve } from '@hono/node-server'
 import { config } from 'dotenv'
 import { Hono } from 'hono'
@@ -10,7 +11,7 @@ export const app = new Hono()
   .use(logger())
   .route('/', routes)
 
-console.log(app.routes)
+log(app.routes)
 const port = process.env.NODE_ENV === 'test' ? 0 : 4000
 serve({
   fetch: app.fetch,
