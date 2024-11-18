@@ -9,8 +9,8 @@ describe('post /auth/login', () => {
     })
     const body = await res.json() as string[]
     expect(body).toBeDefined()
-    expect(body[0]).toBe('Email is required')
-    expect(body[1]).toBe('Password is required')
+    expect(body).toHaveLength(2)
+    expect(body).toEqual(['Email is required', 'Password is required'])
     expect(res.status).toBe(400)
   })
 
@@ -24,8 +24,8 @@ describe('post /auth/login', () => {
     })
     const body = await res.json() as string[]
     expect(body).toBeDefined()
-    expect(body[0]).toBe('Email is required')
-    expect(body[1]).toBe('Password must be at least 8 characters')
+    expect(body).toHaveLength(2)
+    expect(body).toEqual(['Email is required', 'Password must be at least 8 characters'])
     expect(res.status).toBe(400)
   })
 
@@ -40,7 +40,7 @@ describe('post /auth/login', () => {
     })
     const body = await res.json() as string[]
     expect(body).toBeDefined()
-    expect(body[0]).toBe('Password must be at least 8 characters')
+    expect(body).toEqual(['Password must be at least 8 characters'])
     expect(res.status).toBe(400)
   })
   test('should pass the password but throws for wrong email', async () => {
@@ -54,7 +54,7 @@ describe('post /auth/login', () => {
     })
     const body = await res.json() as string[]
     expect(body).toBeDefined()
-    expect(body[0]).toBe('Email is invalid')
+    expect(body).toEqual(['Email is invalid'])
     expect(res.status).toBe(400)
   })
   test('should return error with `not found` message', async () => {
@@ -83,8 +83,7 @@ describe('post /auth/sign-in', () => {
     })
     const body = await res.json() as string[]
     expect(body).toBeDefined()
-    expect(body[0]).toBe('Email is required')
-    expect(body[1]).toBe('Password is required')
+    expect(body).toEqual(['Email is required', 'Password is required', 'Name is required'])
     expect(res.status).toBe(400)
   })
 
@@ -99,7 +98,7 @@ describe('post /auth/sign-in', () => {
     })
     const body = await res.json() as string[]
     expect(body).toBeDefined()
-    expect(body[0]).toBe('Email is invalid')
+    expect(body).toEqual(['Email is invalid', 'Name is required'])
     expect(res.status).toBe(400)
   })
 })
