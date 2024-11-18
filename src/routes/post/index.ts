@@ -11,14 +11,10 @@ import {
   unlikePost,
   unsavePost,
 } from '@/controllers'
-import { uuid } from '@/validators'
+import { RouteValidator, uuid } from '@/validators'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
-
-const RouteValidator = z.object({
-  id: uuid,
-})
 
 const CommentValidator = z.object({
   content: z.string().nullable().optional(),
