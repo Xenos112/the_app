@@ -9,7 +9,7 @@ config()
 export const github = new GitHub(
   process.env.GITHUB_CLIENT_ID,
   process.env.GITHUB_SECRET,
-  null,
+  process.env.GITHUB_REDIRECT_URI,
 )
 
 export interface GitHubUser {
