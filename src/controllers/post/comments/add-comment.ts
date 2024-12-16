@@ -1,12 +1,16 @@
+import type validateToken from '@/utils/validate-token'
 import type { Context } from 'hono'
 import { log } from 'node:console'
 import { db } from '@/db'
 import { Comment } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
-import validateToken from '@/utils/validate-token'
 import { getCookie } from 'hono/cookie'
 
-type AddCommentContext = Context<object, '/:id/comments', {
+type AddCommentContext = Context<{
+  Variables: {
+    user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
+  }
+}, '/:id/comments', {
   in: {
     param: {
       id: string
@@ -37,15 +41,7 @@ export default async function addComment(c: AddCommentContext) {
     const { id } = c.req.valid('param')
     const { content, image_url } = c.req.valid('json')
 
-    const token = getCookie(c, 'auth_token')
-    if (token === undefined) {
-      return c.json({ message: 'Unauthorized' }, 401)
-    }
-
-    const user = await validateToken(token)
-    if (!user) {
-      return c.json({ message: 'Unauthorized' }, 401)
-    }
+    const user = c.get('user')
 
     const post = await _getPostById(id)
     if (post === null) {

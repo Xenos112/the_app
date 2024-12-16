@@ -1,21 +1,14 @@
 import type { Prettify } from '@/types'
+import type validateToken from '@/utils/validate-token'
 import { db } from '@/db'
 import { Media } from '@/db/schema'
-import validateToken from '@/utils/validate-token'
+import authMiddleware from '@/middleware/authenticated'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 
-export default new Hono().get('/', async (c) => {
-  const token = getCookie(c, 'auth_token')
-  if (token === undefined) {
-    return c.json({ message: 'Unauthorized' }, 401)
-  }
-
-  const user = await validateToken(token)
-  if (!user) {
-    return c.json({ message: 'Unauthorized' }, 401)
-  }
+export default new Hono().get('/', authMiddleware, async (c) => {
+  const user = c.get('user')
 
   let userImageProfile: string = ''
   if (typeof user.image_id === 'string') {

@@ -1,3 +1,4 @@
+import type validateToken from '@/utils/validate-token'
 import type { Context } from 'hono'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 

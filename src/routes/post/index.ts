@@ -11,6 +11,7 @@ import {
   unlikePost,
   unsavePost,
 } from '@/controllers'
+import authenticated from '@/middleware/authenticated'
 import { RouteValidator, uuid } from '@/validators'
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
@@ -29,14 +30,14 @@ const DeleteRouteValidator = z.object({
 })
 
 export default new Hono()
-  .get('/:id', zValidator('param', RouteValidator, (res, c) => {
+  .get('/:id', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
   }), getPostById)
 
-  .delete('/:id', zValidator('param', RouteValidator, (res, c) => {
+  .delete('/:id', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
@@ -50,35 +51,35 @@ export default new Hono()
     }
   }), getPostLike)
 
-  .put('/:id/likes', zValidator('param', RouteValidator, (res, c) => {
+  .put('/:id/likes', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
   }), likePost)
 
-  .delete('/:id/likes', zValidator('param', RouteValidator, (res, c) => {
+  .delete('/:id/likes', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
   }), unlikePost)
 
-  .get('/:id/saves', zValidator('param', RouteValidator, (res, c) => {
+  .get('/:id/saves', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
   }), getPostSaves)
 
-  .put('/:id/saves', zValidator('param', RouteValidator, (res, c) => {
+  .put('/:id/saves', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
     }
   }), savePost)
 
-  .delete('/:id/saves', zValidator('param', RouteValidator, (res, c) => {
+  .delete('/:id/saves', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
@@ -92,7 +93,7 @@ export default new Hono()
     }
   }), getPostComments)
 
-  .post('/:id/comments', zValidator('param', RouteValidator, (res, c) => {
+  .post('/:id/comments', authenticated, zValidator('param', RouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
@@ -104,7 +105,7 @@ export default new Hono()
     }
   }), addComment)
 
-  .delete('/:id/comments/:comment_id', zValidator('param', DeleteRouteValidator, (res, c) => {
+  .delete('/:id/comments/:comment_id', authenticated, zValidator('param', DeleteRouteValidator, (res, c) => {
     if (!res.success) {
       const errors = res.error.issues.map(error => error.message)
       return c.json(errors, 400)
