@@ -1,10 +1,10 @@
 import type { OAuth2Tokens } from 'arctic'
+import type { Context } from 'hono'
 import { authenticate, github, type GitHubUser } from '@/lib/oauth/github'
 import { generateToken } from '@/utils/generate-token'
-import { Hono } from 'hono'
 import { getCookie, setCookie } from 'hono/cookie'
 
-export default new Hono().get('/', async (c) => {
+export default async function (c: Context) {
   const url = new URL(c.req.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
@@ -42,4 +42,4 @@ export default new Hono().get('/', async (c) => {
     httpOnly: true,
   })
   return c.json(user)
-})
+}

@@ -1,19 +1,27 @@
+import type { Context } from 'hono'
 import { db } from '@/db'
 import { User } from '@/db/schema'
 import { generateToken } from '@/utils/generate-token'
-import { LoginSchema } from '@/validators/auth'
-import { zValidator } from '@hono/zod-validator'
 import bcrypt from 'bcrypt'
 import { eq } from 'drizzle-orm'
-import { Hono } from 'hono'
 import { setCookie } from 'hono/cookie'
 
-export default new Hono().post('/', zValidator('json', LoginSchema, (res, c) => {
-  if (!res.success) {
-    const errors = res.error.issues.map(error => error.message)
-    return c.json(errors, 400)
+type LoginContext = Context<object, '/', {
+  in: {
+    json: {
+      email: string
+      password: string
+    }
   }
-}), async (c) => {
+  out: {
+    json: {
+      email: string
+      password: string
+    }
+  }
+}>
+
+async function login(c: LoginContext) {
   try {
     const { email, password } = c.req.valid('json') as { email: string, password: string }
     const user = (await db.select().from(User).where(eq(User.email, email))).at(0)
@@ -43,4 +51,6 @@ export default new Hono().post('/', zValidator('json', LoginSchema, (res, c) => 
     }
     return c.json({ message: 'Internal server error' }, 500)
   }
-})
+}
+
+export default login

@@ -75,9 +75,9 @@ describe('post /auth/login', () => {
   })
 })
 
-describe('post /auth/sign-in', () => {
+describe('post /auth/register', () => {
   test('should return two errors with status 400', async () => {
-    const res = await app.request('/auth/sign-in', {
+    const res = await app.request('/auth/register', {
       body: JSON.stringify('testing'),
       method: 'POST',
     })
@@ -88,7 +88,7 @@ describe('post /auth/sign-in', () => {
   })
 
   test('should throw one error with status 400 and email error', async () => {
-    const res = await app.request('/auth/sign-in', {
+    const res = await app.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
         email: 'test',

@@ -1,13 +1,17 @@
 import type { Prettify } from '@/types'
 import type validateToken from '@/utils/validate-token'
+import type { Context } from 'hono'
 import { db } from '@/db'
 import { Media } from '@/db/schema'
-import authMiddleware from '@/middleware/authenticated'
 import { eq } from 'drizzle-orm'
-import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 
-export default new Hono().get('/', authMiddleware, async (c) => {
+type MeContext = Context<{
+  Variables: {
+    user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
+  }
+}, '/', object>
+
+async function me(c: MeContext) {
   const user = c.get('user')
 
   let userImageProfile: string = ''
@@ -35,4 +39,6 @@ export default new Hono().get('/', authMiddleware, async (c) => {
   delete finaleUserResponse.banner_id
   delete finaleUserResponse.bio
   return c.json((finaleUserResponse) as ValidateToken & { image_url: string | null })
-})
+}
+
+export default me
