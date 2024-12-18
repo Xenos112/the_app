@@ -78,7 +78,7 @@ describe('delete /post/:id/likes', () => {
   })
 })
 
-describe('dELETE /post/:id/saves', () => {
+describe('delete /post/:id/saves', () => {
   test('should return 200 with unsave = true', async () => {
     const user = await db.select().from(User).limit(1)
     const token = generateToken(user.at(0)!.id)
