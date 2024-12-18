@@ -117,4 +117,18 @@ describe('dELETE /post/:id/saves', () => {
     expect(res.status).toBe(404)
     expect(body.message).toBe('Post not found')
   })
+
+  test('should return 404 with message \'UUID is invalid\' for invalid post ID', async () => {
+    const user = await db.select().from(User).limit(1)
+    const token = generateToken(user.at(0)!.id)
+    const res = await app.request(`/post/invalid-id/saves`, {
+      method: 'DELETE',
+      headers: {
+        Cookie: `auth_token=${token}`,
+      },
+    })
+    const body = await res.json() as { message: string }
+    expect(res.status).toBe(400)
+    expect(body).toStrictEqual(['UUID is invalid'])
+  })
 })
