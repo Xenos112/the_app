@@ -41,5 +41,6 @@ export default async function (c: Context) {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
   })
-  return c.json(user)
+
+  return c.redirect('http://localhost:3000', 302)
 }
