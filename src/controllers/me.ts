@@ -38,7 +38,10 @@ async function me(c: MeContext) {
   delete finaleUserResponse.image_id
   delete finaleUserResponse.banner_id
   delete finaleUserResponse.bio
-  return c.json((finaleUserResponse) as ValidateToken & { image_url: string | null })
+  return c.json({
+    data:
+     (finaleUserResponse as ValidateToken & { image_url: string | null }),
+  })
 }
 
 export default me

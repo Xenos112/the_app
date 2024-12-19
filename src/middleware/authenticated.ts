@@ -1,4 +1,3 @@
-import type { Context, Next } from 'hono'
 import validateToken from '@/utils/validate-token'
 import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
@@ -17,7 +16,6 @@ const authMiddleware = createMiddleware<{
   if (!user) {
     return c.json({ message: 'Unauthorized' }, 401)
   }
-
   c.set('user', user)
 
   return next()

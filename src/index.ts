@@ -5,6 +5,7 @@ import { CommentValidator, DeleteRouteValidator } from '@/validators/index'
 import { serve } from '@hono/node-server'
 import { config } from 'dotenv'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { honoValidator, RouteValidator } from './validators'
 import { LoginSchema, RegisterSchema } from './validators/auth'
@@ -13,13 +14,15 @@ config()
 
 export const app = new Hono()
 app.use(logger())
-app.post('/auth/login', honoValidator(LoginSchema, 'json'), controllers.login)
-app.post('/auth/register', honoValidator(RegisterSchema, 'json'), controllers.register)
+app.use(cors({ origin: 'http://localhost:3001', credentials: true }))
+
+app.post('/auth/login', cors({ origin: 'http://localhost:3001', credentials: true }), honoValidator(LoginSchema, 'json'), controllers.login)
+app.post('/auth/register', cors({ origin: 'http://localhost:3001', credentials: true }), honoValidator(RegisterSchema, 'json'), controllers.register)
 app.get('/auth/discord', controllers.discord)
 app.get('/auth/discord/callback', controllers.discordCallback)
 app.get('/auth/github', controllers.github)
 app.get('/auth/github/callback', controllers.githubCallback)
-app.get('/me', controllers.me)
+app.get('/me', authenticated, controllers.me)
 app.get('/post/:id', honoValidator(RouteValidator, 'param'), controllers.getPostById)
 app.get('/post/:id/likes', honoValidator(RouteValidator, 'param'), controllers.getPostLike)
 app.get('/post/:id/saves', honoValidator(RouteValidator, 'param'), controllers.getPostSaves)
