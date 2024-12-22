@@ -26,16 +26,16 @@ async function login(c: LoginContext) {
     const { email, password } = c.req.valid('json') as { email: string, password: string }
     const user = (await db.select().from(User).where(eq(User.email, email))).at(0)
     if (!user) {
-      return c.json({ message: 'User not found' }, 404)
+      return c.json({ error: 'User not found' }, 404)
     }
 
     if (user.password === null) {
-      return c.json({ message: 'this Account Is Linked with a social account' }, 401)
+      return c.json({error: 'this Account Is Linked with a social account' }, 401)
     }
 
     const isPasswordCorrect = bcrypt.compareSync(password, user.password) as unknown as string
     if (Boolean(isPasswordCorrect) === false) {
-      return c.json({ message: 'Incorrect password' }, 401)
+      return c.json({ error: 'Incorrect password' }, 401)
     }
 
     const token = generateToken(user.id)
@@ -47,9 +47,9 @@ async function login(c: LoginContext) {
   }
   catch (error) {
     if (error instanceof Error) {
-      return c.json({ message: 'Internal server error' }, 500)
+      return c.json({ error: 'Internal server error' }, 500)
     }
-    return c.json({ message: 'Internal server error' }, 500)
+    return c.json({ error: 'Internal server error' }, 500)
   }
 }
 
