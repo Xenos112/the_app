@@ -11,17 +11,17 @@ type SavePostContext = Context<{
     user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
   }
 }, '/:id/saves', {
-  in: {
-    param: {
-      id: string
+    in: {
+      param: {
+        id: string
+      }
     }
-  }
-  out: {
-    param: {
-      id: string
+    out: {
+      param: {
+        id: string
+      }
     }
-  }
-}>
+  }>
 
 export default async function savePost(c: SavePostContext) {
   try {

@@ -1,7 +1,6 @@
 import { db } from '@/db'
-import { Post, User } from '@/db/schema'
+import { Post } from '@/db/schema'
 import { app } from '@/index'
-import { generateToken } from '@/utils/generate-token'
 import { v4 as uuid } from 'uuid'
 import { describe, expect, test } from 'vitest'
 

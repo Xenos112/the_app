@@ -5,24 +5,25 @@ import { db } from '@/db'
 import { Comment } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 import { and, eq } from 'drizzle-orm'
+
 type DeleteCommentByIdContext = Context<{
   Variables: {
     user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
   }
 }, '/:id/comments/:comment_id', {
-  in: {
-    param: {
-      id: string
-      comment_id: string
+    in: {
+      param: {
+        id: string
+        comment_id: string
+      }
     }
-  }
-  out: {
-    param: {
-      id: string
-      comment_id: string
+    out: {
+      param: {
+        id: string
+        comment_id: string
+      }
     }
-  }
-}>
+  }>
 
 export default async function deleteCommentById(c: DeleteCommentByIdContext) {
   try {

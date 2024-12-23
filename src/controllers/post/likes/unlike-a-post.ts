@@ -6,22 +6,24 @@ import { Like, Post } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 import { and, eq } from 'drizzle-orm'
 
+
+// FIXME: post likes are less then 0 most of the time
 type UnlikePostContext = Context<{
   Variables: {
     user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
   }
 }, '/:id/likes', {
-    in: {
-      param: {
-        id: string
-      }
+  in: {
+    param: {
+      id: string
     }
-    out: {
-      param: {
-        id: string
-      }
+  }
+  out: {
+    param: {
+      id: string
     }
-  }>
+  }
+}>
 
 export default async function unlikePost(c: UnlikePostContext) {
   try {
