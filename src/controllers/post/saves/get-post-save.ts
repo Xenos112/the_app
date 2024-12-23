@@ -26,7 +26,7 @@ export default async function getPostSaves(c: GetPostSaveContext) {
     const user = await validateToken(token ?? '')
     const post = await _getPostById(id)
     if (post === null) {
-      return c.json({ message: 'Post not found' }, 404)
+      return c.json({ error: 'Post not found' }, 404)
     }
 
     const isSavedByAuthenticatedUser = user ? await db.select().from(Save).where(and(eq(Save.user_id, user.id), eq(Save.post_id, id))).limit(1) : []

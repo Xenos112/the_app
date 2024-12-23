@@ -8,9 +8,9 @@ import { describe, expect, test } from 'vitest'
 describe('get /post/:id', () => {
   test('should return 404 with `not found` message', async () => {
     const res = await app.request(`/post/${uuid()}`)
-    const body = await res.json() as { message: string }
+    const body = await res.json() as { error: string }
     expect(res.status).toBe(404)
-    expect(body.message).toBe('Post not found')
+    expect(body.error).toBe('Post not found')
   })
 
   test('should get the post', async () => {
@@ -72,9 +72,9 @@ describe('delete /post/:id/likes', () => {
         Cookie: `auth_token=${token}`,
       },
     })
-    const body = await res.json() as { message: string }
+    const body = await res.json() as { error: string }
     expect(res.status).toBe(404)
-    expect(body.message).toBe('Post not found')
+    expect(body.error).toBe('Post not found')
   })
 })
 
@@ -89,9 +89,9 @@ describe('delete /post/:id/saves', () => {
         Cookie: `auth_token=${token}`,
       },
     })
-    const body = await res.json() as { unsave: boolean }
+    const body = await res.json() as { unsaved: boolean }
     expect(res.status).toBe(200)
-    expect(body.unsave).toBe(true)
+    expect(body.unsaved).toBe(true)
   })
 
   test('should return 401 with message \'Unauthorized\'', async () => {
@@ -113,9 +113,11 @@ describe('delete /post/:id/saves', () => {
         Cookie: `auth_token=${token}`,
       },
     })
-    const body = await res.json() as { message: string }
+    const body = await res.json() as {
+      error: string
+    }
     expect(res.status).toBe(404)
-    expect(body.message).toBe('Post not found')
+    expect(body.error).toBe('Post not found')
   })
 
   test('should return 404 with message \'UUID is invalid\' for invalid post ID', async () => {

@@ -7,20 +7,22 @@ import _getPostById from '@/features/post/lib/get-post-by-id'
 import { and, eq } from 'drizzle-orm'
 import { getCookie } from 'hono/cookie'
 
-type LikePostContext = Context<{ Variables: {
-  user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
-} }, '/:id/likes', {
-    in: {
-      param: {
-        id: string
-      }
+type LikePostContext = Context<{
+  Variables: {
+    user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
+  }
+}, '/:id/likes', {
+  in: {
+    param: {
+      id: string
     }
-    out: {
-      param: {
-        id: string
-      }
+  }
+  out: {
+    param: {
+      id: string
     }
-  }>
+  }
+}>
 
 export default async function likePost(c: LikePostContext) {
   try {
@@ -29,7 +31,7 @@ export default async function likePost(c: LikePostContext) {
 
     const post = await _getPostById(id)
     if (post === null) {
-      return c.json({ message: 'Post not found' }, 404)
+      return c.json({ error: 'Post not found' }, 404)
     }
 
     const postLiked = await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id))).limit(1)

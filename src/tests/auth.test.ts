@@ -69,7 +69,7 @@ describe('post /auth/login', () => {
     const body = await res.json() as string[]
     expect(body).toBeDefined()
     expect(body).toEqual({
-      message: 'User not found',
+      error: 'User not found',
     })
     expect(res.status).toBe(404)
   })

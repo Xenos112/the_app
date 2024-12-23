@@ -5,24 +5,23 @@ import { db } from '@/db'
 import { Post, Save } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 import { and, eq } from 'drizzle-orm'
-import { getCookie } from 'hono/cookie'
 
 type UnSavePostContext = Context<{
   Variables: {
     user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
   }
 }, '/:id/saves', {
-    in: {
-      param: {
-        id: string
-      }
+  in: {
+    param: {
+      id: string
     }
-    out: {
-      param: {
-        id: string
-      }
+  }
+  out: {
+    param: {
+      id: string
     }
-  }>
+  }
+}>
 
 export default async function unsavePost(c: UnSavePostContext) {
   try {
@@ -31,12 +30,12 @@ export default async function unsavePost(c: UnSavePostContext) {
 
     const post = await _getPostById(id)
     if (post === null) {
-      return c.json({ message: 'Post not found' }, 404)
+      return c.json({ error: 'Post not found' }, 404)
     }
 
     await db.delete(Save).where(and(eq(Save.post_id, id), eq(Save.user_id, user.id)))
     await db.update(Post).set({ saves_count: post.saves_count! - 1 }).where(eq(Post.id, id))
-    return c.json({ unsave: true })
+    return c.json({ unsaved: true })
   }
   catch (error) {
     log(error)
