@@ -13,6 +13,7 @@ export const userRoles = pgEnum('user_roles', ['User', 'Admin', 'Creator'])
 export const mediaTypes = pgEnum('media_types', ['image', 'video'])
 export const mediaTargetTypes = pgEnum('media_target_types', ['user:image', 'user:banner', 'post'])
 
+// TODO: add a tag property for the user and it should be unique
 export const Media = pgTable('medias', {
   id: uuid('id')
     .primaryKey()

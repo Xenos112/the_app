@@ -42,6 +42,6 @@ export default async function callback(c: Context) {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
   })
-  
-  return c.redirect('http://localhost:3000/',302)
+
+  return c.redirect('http://localhost:3000/', 302)
 }

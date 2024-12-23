@@ -30,7 +30,7 @@ async function login(c: LoginContext) {
     }
 
     if (user.password === null) {
-      return c.json({error: 'this Account Is Linked with a social account' }, 401)
+      return c.json({ error: 'this Account Is Linked with a social account' }, 401)
     }
 
     const isPasswordCorrect = bcrypt.compareSync(password, user.password) as unknown as string

@@ -29,7 +29,7 @@ export default async function unsavePost(c: UnSavePostContext) {
     const user = c.get('user')
 
     const post = await _getPostById(id)
-    if (post === null) {
+    if (!post) {
       return c.json({ error: 'Post not found' }, 404)
     }
 

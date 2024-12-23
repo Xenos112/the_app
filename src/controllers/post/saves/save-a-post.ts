@@ -28,7 +28,6 @@ export default async function savePost(c: SavePostContext) {
     const { id } = c.req.valid('param')
     const user = c.get('user')
     const post = await _getPostById(id)
-    console.log(post)
 
     if (post === null) {
       return c.json({ error: 'Post not found' }, 404)
@@ -36,7 +35,7 @@ export default async function savePost(c: SavePostContext) {
 
     const postLiked = await db.select().from(Save).where(and(eq(Save.post_id, id), eq(Save.user_id, user.id))).limit(1)
     if (postLiked.length > 0) {
-      return c.json({ liked: true })
+      return c.json({ saved: true })
     }
 
     await db.insert(Save).values({

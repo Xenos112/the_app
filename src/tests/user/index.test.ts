@@ -1,9 +1,9 @@
-import { describe, test, expect } from 'vitest'
 import { app } from '@/index'
 import { v4 as uuid } from 'uuid'
+import { describe, expect, test } from 'vitest'
 
-describe("User Routes", () => {
-  test("return 404 with error `not found` for when the user is not in the database", async () => {
+describe('user Routes', () => {
+  test('return 404 with error `not found` for when the user is not in the database', async () => {
     const randomUserId = uuid()
 
     const res = await app.request(`/user/${randomUserId}`)
@@ -13,7 +13,7 @@ describe("User Routes", () => {
   })
 
   test('return status 400 for when the uuid is not valid', async () => {
-    const nonValidUserId = 'not_a_valid';
+    const nonValidUserId = 'not_a_valid'
 
     const res = await app.request(`/user/${nonValidUserId}`)
     expect(res.status).toBe(400)

@@ -5,7 +5,6 @@ import { db } from '@/db'
 import { Like, Post } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 import { and, eq } from 'drizzle-orm'
-import { getCookie } from 'hono/cookie'
 
 type LikePostContext = Context<{
   Variables: {

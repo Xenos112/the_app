@@ -23,14 +23,14 @@ export default async function getPostSaves(c: GetPostSaveContext) {
   try {
     const { id } = c.req.valid('param')
     const token = getCookie(c, 'auth_token')
-    const user = await validateToken(token ?? '')
+    const user = token ? await validateToken(token) : null
     const post = await _getPostById(id)
-    if (post === null) {
+    if (!post) {
       return c.json({ error: 'Post not found' }, 404)
     }
 
     const isSavedByAuthenticatedUser = user ? await db.select().from(Save).where(and(eq(Save.user_id, user.id), eq(Save.post_id, id))).limit(1) : []
-    return c.json({ saves: post.saves_count, saved: isSavedByAuthenticatedUser.length > 0 })
+    return c.json({ data: { saves: post.saves_count, saved: isSavedByAuthenticatedUser.length > 0 } })
   }
   catch (error) {
     return c.json({ error }, 500)

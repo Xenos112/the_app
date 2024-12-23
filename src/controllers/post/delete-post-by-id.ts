@@ -4,7 +4,6 @@ import { db } from '@/db'
 import { Post } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 import { eq } from 'drizzle-orm'
-import { getCookie } from 'hono/cookie'
 
 type DeletePostById = Context<{
   Variables: {

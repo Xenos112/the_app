@@ -4,7 +4,6 @@ import { log } from 'node:console'
 import { db } from '@/db'
 import { Comment } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
-import { getCookie } from 'hono/cookie'
 
 type AddCommentContext = Context<{
   Variables: {
