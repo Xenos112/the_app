@@ -35,6 +35,7 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
   .delete('/post/:id/comments/:commentId', authenticated, honoValidator(DeleteRouteValidator, 'param'), controllers.deleteCommentById)
   .delete('/post/:id', authenticated, honoValidator(RouteValidator, 'param'), controllers.deletePostById)
   .get('/user/:id', honoValidator(RouteValidator, 'param'), controllers.getUserById)
+  .get('/who-to-follow', controllers.whoToFollow)
 
 log(app.routes)
 const port = process.env.NODE_ENV === 'test' ? 0 : 4000
