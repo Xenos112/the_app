@@ -12,17 +12,17 @@ type UnSavePostContext = Context<{
     user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
   }
 }, '/:id/saves', {
-  in: {
-    param: {
-      id: string
+    in: {
+      param: {
+        id: string
+      }
     }
-  }
-  out: {
-    param: {
-      id: string
+    out: {
+      param: {
+        id: string
+      }
     }
-  }
-}>
+  }>
 
 export default async function unsavePost(c: UnSavePostContext) {
   try {
@@ -35,7 +35,8 @@ export default async function unsavePost(c: UnSavePostContext) {
     }
 
     await db.delete(Save).where(and(eq(Save.post_id, id), eq(Save.user_id, user.id)))
-    await db.update(Post).set({ saves_count: post.saves_count! - 1 }).where(eq(Post.id, id))
+    const saves = (await db.select({ id: Save.post_id }).from(Save).where(eq(Save.post_id, id))).length
+    await db.update(Post).set({ saves_count: saves === 0 ? 0 : saves - 1 }).where(eq(Post.id, id))
     return c.json({ unsaved: true })
   }
   catch (error) {

@@ -6,24 +6,23 @@ import { Like, Post } from '@/db/schema'
 import _getPostById from '@/features/post/lib/get-post-by-id'
 import { and, eq } from 'drizzle-orm'
 
-
 // FIXME: post likes are less then 0 most of the time
 type UnlikePostContext = Context<{
   Variables: {
     user: Exclude<Awaited<ReturnType<typeof validateToken>>, null>
   }
 }, '/:id/likes', {
-  in: {
-    param: {
-      id: string
+    in: {
+      param: {
+        id: string
+      }
     }
-  }
-  out: {
-    param: {
-      id: string
+    out: {
+      param: {
+        id: string
+      }
     }
-  }
-}>
+  }>
 
 export default async function unlikePost(c: UnlikePostContext) {
   try {
@@ -36,7 +35,8 @@ export default async function unlikePost(c: UnlikePostContext) {
     }
 
     await db.delete(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, user.id)))
-    await db.update(Post).set({ likes_count: post.likes_count! - 1 }).where(eq(Post.id, id))
+    const postLikes = (await db.select().from(Like).where(eq(Like.post_id, id))).length
+    await db.update(Post).set({ likes_count: postLikes === 0 ? 0 : postLikes - 1 }).where(eq(Post.id, id))
     return c.json({ unliked: true })
   }
   catch (error) {
