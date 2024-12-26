@@ -28,7 +28,7 @@ describe('post Route', () => {
     }).returning()
 
     const res = await app.request(`/post/${createdPostByTheUser.id}`)
-    const post = (await res.json()).data
+    const post = (await res.json()).data as typeof Post.$inferSelect
 
     expect(res.status).toBe(200)
     expect(post.id).toBe(postUUID)
