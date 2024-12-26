@@ -22,7 +22,7 @@ describe('post Like GET Route', () => {
     const randomPostUUID = await db.query.Post.findFirst().then(post => post!.id)
     const res = await app.request(`/post/${randomPostUUID}/likes`)
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as { data: { liked: boolean, likes: number } }
     expect(body.data).toBeDefined()
     expect(body.data).toHaveProperty('liked')
     expect(body.data).toHaveProperty('likes')
@@ -55,7 +55,7 @@ describe('post Put Like Route', () => {
       },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as { liked: boolean }
     expect(body.liked).toBeDefined()
     strictEqual(typeof body.liked, 'boolean')
   })
@@ -101,7 +101,7 @@ describe('post Delete Like Route', () => {
       },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as { unliked: boolean }
     expect(body.unliked).toBeDefined()
     strictEqual(typeof body.unliked, 'boolean')
   })

@@ -15,8 +15,7 @@ describe('post Save GET Route', () => {
   test('it Should return 404 for not found posts', async () => {
     const randomPostUUID = uuid()
     const res = await app.request(`/post/${randomPostUUID}/saves`)
-    const error = await res.json()
-    console.log(error)
+    await res.json() as { error: string }
     expect(res.status).toBe(404)
   })
 
@@ -24,7 +23,7 @@ describe('post Save GET Route', () => {
     const randomPostUUID = await db.query.Post.findFirst().then(post => post!.id)
     const res = await app.request(`/post/${randomPostUUID}/saves`)
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as { data: { saved: boolean, saves: number } }
     expect(body.data).toBeDefined()
     expect(body.data).toHaveProperty('saved')
     expect(body.data).toHaveProperty('saves')
@@ -57,7 +56,7 @@ describe('post Put Save Route', () => {
       },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as { saved: boolean }
     expect(body.saved).toBeDefined()
     strictEqual(typeof body.saved, 'boolean')
   })
@@ -103,7 +102,7 @@ describe('post Delete Save Route', () => {
       },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as { unsaved: boolean }
     expect(body.unsaved).toBeDefined()
     strictEqual(typeof body.unsaved, 'boolean')
   })
