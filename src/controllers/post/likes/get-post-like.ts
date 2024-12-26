@@ -24,8 +24,8 @@ export default async function getPostLike(c: GetPostLikeContext) {
     const { id } = c.req.valid('param')
     const post = await _getPostById(id)
     const token = getCookie(c, 'auth_token')
-    const user = token ? await validateToken(token) : null
-    if (!post) {
+    const user = token != null ? await validateToken(token) : null
+    if (post == null) {
       return c.json({ error: 'Post not found' }, 404)
     }
 

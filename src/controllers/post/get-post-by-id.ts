@@ -25,7 +25,7 @@ export default async function getPostById(c: GetUserByIdContext) {
     const authToken = getCookie(c, 'auth_token')
     let userId: string | undefined
 
-    if (authToken) {
+    if (authToken != null) {
       userId = (await validateToken(authToken))?.id
     }
 
@@ -37,7 +37,7 @@ export default async function getPostById(c: GetUserByIdContext) {
     // TODO: make functions for the user to get his full profile picture
     let authorProfileUrl = ''
     const [postAuthor] = await db.select({ user_name: User.user_name, profile_id: User.image_id, id: User.id }).from(User).where(eq(User.id, post.author_id)).limit(1)
-    if (postAuthor.profile_id) {
+    if (postAuthor.profile_id != null) {
       const [userProfilePicture] = await db.select({ url: Media.url }).from(Media).where(eq(Media.id, postAuthor.profile_id)).limit(1)
       authorProfileUrl = userProfilePicture.url
     }
@@ -45,7 +45,7 @@ export default async function getPostById(c: GetUserByIdContext) {
     const postPictures = await db.select({ type: Media.type, url: Media.url }).from(Media).where(eq(Media.target_id, id))
     post.pictures = postPictures
 
-    if (!userId) {
+    if (userId == null) {
       return c.json({ data: { ...post, author: { ...postAuthor, profile_picture_url: authorProfileUrl }, isLiked: false, isSaved: false } })
     }
 

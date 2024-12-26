@@ -23,9 +23,9 @@ export default async function getPostSaves(c: GetPostSaveContext) {
   try {
     const { id } = c.req.valid('param')
     const token = getCookie(c, 'auth_token')
-    const user = token ? await validateToken(token) : null
+    const user = (token != null) ? await validateToken(token) : null
     const post = await _getPostById(id)
-    if (!post) {
+    if (post == null) {
       return c.json({ error: 'Post not found' }, 404)
     }
 
