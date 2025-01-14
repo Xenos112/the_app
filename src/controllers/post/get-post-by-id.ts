@@ -42,12 +42,12 @@ export default async function getPostById(c: GetUserByIdContext) {
     post.pictures = postPictures
 
     if (userId == null) {
-      return c.json({ data: { ...post, author: { ...postAuthor, profile_picture_url: postAuthor?.avatar?.url }, isLiked: false, isSaved: false } })
+      return c.json({ data: { ...post, author: postAuthor, isLiked: false, isSaved: false } })
     }
 
     const isLiked = (await db.select().from(Like).where(and(eq(Like.post_id, id), eq(Like.user_id, userId))).limit(1)).length === 1
     const isSaved = (await db.select().from(Save).where(and(eq(Save.post_id, id), eq(Save.user_id, userId))).limit(1)).length === 1
-    return c.json({ data: { ...post, author: { ...postAuthor, profile_picture_url: postAuthor?.avatar?.url }, isLiked, isSaved } })
+    return c.json({ data: { ...post, author: postAuthor, isLiked, isSaved } })
   }
 
   catch (error) {

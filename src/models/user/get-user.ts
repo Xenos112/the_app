@@ -18,9 +18,10 @@ export default async function getUser(id: string): Promise<UserData | null> {
   if (user == null)
     return null
 
-  const [profilePicture] = await db.select().from(Media).where(eq(Media.target_id, user.id)).limit(1)
-  if (profilePicture != null && 'id' in profilePicture)
+  if (user.image_id !== null) {
+    const [profilePicture] = await db.select().from(Media).where(eq(Media.id, user.image_id)).limit(1)
     user.avatar = profilePicture
+  }
 
   return user
 }
