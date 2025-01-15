@@ -1,4 +1,5 @@
 import { log } from 'node:console'
+import fs from 'fs'
 import * as controllers from '@/controllers'
 import authenticated from '@/middleware/authenticated'
 import { CommentValidator, DeleteRouteValidator } from '@/validators/index'
@@ -9,10 +10,14 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { honoValidator, RouteValidator } from './validators'
 import { LoginSchema, RegisterSchema } from './validators/auth'
+import { v4 as uuidv4 } from 'uuid'
+import { serveStatic } from '@hono/node-server/serve-static'
+import path from 'node:path'
 
 config()
 
 export const app = new Hono()
+app.use('*', serveStatic({ root: './uploads' }))
 app.use(logger())
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
 
@@ -36,6 +41,34 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
   .delete('/post/:id', authenticated, honoValidator(RouteValidator, 'param'), controllers.deletePostById)
   .get('/user/:id', honoValidator(RouteValidator, 'param'), controllers.getUserById)
   .get('/who-to-follow', controllers.whoToFollow)
+  .post('/upload', async (c) => {
+    const form = await c.req.formData();
+    const files = form.getAll('file'); // Get all files in the form
+
+    const uploadDir = './uploads';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const fileUrls = [];
+
+    // Process each file
+    for (const f of files) {
+      if (f instanceof File) {
+        const fileBytes = await f.arrayBuffer();
+        const fileName = uuidv4() + '.' + f.type.split('/')[1];
+        const filePath = './uploads/' + fileName;
+
+        fs.writeFileSync(filePath, Buffer.from(fileBytes));
+
+        const url = 'http://localhost:4000/uploads/' + fileName;
+        fileUrls.push(url);
+      }
+    }
+
+    return c.json({ message: 'Files uploaded successfully', urls: fileUrls });
+  })
+
 
 log(app.routes)
 const port = process.env.NODE_ENV === 'test' ? 0 : 4000
