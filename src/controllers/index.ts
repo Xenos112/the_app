@@ -18,3 +18,4 @@ export { default as savePost } from "./post/saves/save-a-post";
 export { default as unsavePost } from "./post/saves/unsave-a-post";
 export { default as getUserById } from "./user/get-user-by-id";
 export { default as whoToFollow } from "./who-to-follow";
+export { default as createPost } from "./post/create-post";

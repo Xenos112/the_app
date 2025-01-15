@@ -306,3 +306,5 @@ export type SourceUrlSelect = typeof Media.$inferSelect
 export type SourceUrlInsert = typeof Media.$inferInsert
 export type RelationsSelect = typeof Relations.$inferSelect
 export type RelationsInsert = typeof Relations.$inferInsert
+export type MediaSelect = typeof Media.$inferSelect
+export type MediaInsert = typeof Media.$inferInsert

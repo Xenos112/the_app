@@ -12,7 +12,6 @@ import { honoValidator, RouteValidator } from './validators'
 import { LoginSchema, RegisterSchema } from './validators/auth'
 import { v4 as uuidv4 } from 'uuid'
 import { serveStatic } from '@hono/node-server/serve-static'
-import path from 'node:path'
 
 config()
 
@@ -41,32 +40,36 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
   .delete('/post/:id', authenticated, honoValidator(RouteValidator, 'param'), controllers.deletePostById)
   .get('/user/:id', honoValidator(RouteValidator, 'param'), controllers.getUserById)
   .get('/who-to-follow', controllers.whoToFollow)
+  .post('/post', authenticated, controllers.createPost)
   .post('/upload', async (c) => {
-    const form = await c.req.formData();
-    const files = form.getAll('file'); // Get all files in the form
+    try {
+      const form = await c.req.formData();
+      const files = form.getAll('file')
 
-    const uploadDir = './uploads';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const fileUrls = [];
-
-    // Process each file
-    for (const f of files) {
-      if (f instanceof File) {
-        const fileBytes = await f.arrayBuffer();
-        const fileName = uuidv4() + '.' + f.type.split('/')[1];
-        const filePath = './uploads/' + fileName;
-
-        fs.writeFileSync(filePath, Buffer.from(fileBytes));
-
-        const url = 'http://localhost:4000/uploads/' + fileName;
-        fileUrls.push(url);
+      const uploadDir = './uploads';
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
       }
-    }
 
-    return c.json({ message: 'Files uploaded successfully', urls: fileUrls });
+      const fileUrls = [];
+
+      for (const f of files) {
+        if (f instanceof File) {
+          const fileBytes = await f.arrayBuffer();
+          const fileName = uuidv4() + '.' + f.type.split('/')[1];
+          const filePath = './uploads/' + fileName;
+
+          fs.writeFileSync(filePath, Buffer.from(fileBytes));
+
+          const url = 'http://localhost:4000/uploads/' + fileName;
+          fileUrls.push(url);
+        }
+      }
+      return c.json({ message: 'Files uploaded successfully', urls: fileUrls });
+    } catch (error) {
+      console.error(error);
+      return c.json({ message: 'Error uploading files', error: (error as Error).message });
+    }
   })
 
 

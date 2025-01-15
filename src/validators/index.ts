@@ -31,3 +31,9 @@ export function honoValidator<T extends z.ZodTypeAny>(
     }
   })
 }
+
+export const CreatePostSchema = z.object({
+  content: z.string(),
+  community_id: z.string().uuid().optional(),
+  files: z.array(z.string()).min(1, { message: 'Files are required' }),
+})
