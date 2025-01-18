@@ -178,6 +178,32 @@ export const Community_User = pgTable(
   }),
 )
 
+export const Message = pgTable('messages', {
+  id: uuid('id')
+    .primaryKey()
+    .notNull()
+    .defaultRandom(),
+  sender_id: uuid('sender_id')
+    .notNull()
+    .references(() => User.id, { onDelete: 'cascade' }),
+  receiver_id: uuid('receiver_id')
+    .notNull()
+    .references(() => User.id, { onDelete: 'cascade' }),
+  message: text('message'),
+  created_at: timestamp('created_at').defaultNow(),
+})
+
+export const messageRelations = relations(Message, ({ one }) => ({
+  sender: one(User, {
+    fields: [Message.sender_id],
+    references: [User.id],
+  }),
+  receiver: one(User, {
+    fields: [Message.receiver_id],
+    references: [User.id],
+  }),
+}))
+
 export const userRelations = relations(User, ({ many, one }) => ({
   posts: many(Post),
   comments: many(Comment),

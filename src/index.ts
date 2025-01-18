@@ -12,10 +12,22 @@ import { logger } from 'hono/logger'
 import { v4 as uuidv4 } from 'uuid'
 import { honoValidator, RouteValidator } from './validators'
 import { LoginSchema, RegisterSchema } from './validators/auth'
+import { createNodeWebSocket } from '@hono/node-ws'
+import { db } from './db'
+import { Message } from './db/schema'
 
 config()
 
+// TODO: move the type to somewhere else
+type WebSocketPayload = {
+  senderId: string,
+  message: string,
+  receiverId: string,
+}
+
 export const app = new Hono()
+// websocket node-server
+const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
 app.use('*', serveStatic({ root: './uploads' }))
 app.use(logger())
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
@@ -72,10 +84,30 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
       return c.json({ message: 'Error uploading files', error: (error as Error).message })
     }
   })
+  .get('/ws', upgradeWebSocket(_c => ({
+    onMessage: async (event, ws) => {
+      try {
+        const payload = JSON.parse(event.data.toString()) as WebSocketPayload
+
+        const [newMessage] = await db.insert(Message).values({
+          receiver_id: payload.receiverId,
+          sender_id: payload.senderId,
+          message: payload.message,
+        }).returning()
+
+        ws.send(JSON.stringify(newMessage))
+      } catch (error) {
+        ws.send(JSON.stringify({ message: 'Error inserting message' }))
+      }
+    }
+  })))
 
 log(app.routes)
 const port = process.env.NODE_ENV === 'test' ? 0 : 4000
-serve({
+const server = serve({
   fetch: app.fetch,
   port,
 })
+
+// websocket injection
+injectWebSocket(server)
