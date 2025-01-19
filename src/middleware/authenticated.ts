@@ -1,5 +1,6 @@
+import revalidateToken from '@/utils/revalidateToken'
 import validateToken from '@/utils/validate-token'
-import { getCookie } from 'hono/cookie'
+import { getCookie, setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 
 const authMiddleware = createMiddleware<{
@@ -16,6 +17,18 @@ const authMiddleware = createMiddleware<{
   if (!user) {
     return c.json({ message: 'Unauthorized' }, 401)
   }
+
+  // TEST: this part of code needs to be tested to make sure the token is valid
+  const newToken = revalidateToken(token)
+  if (newToken) {
+    setCookie(c, 'auth_token', newToken, {
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    })
+  }
+
   c.set('user', user)
 
   return next()
